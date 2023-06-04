@@ -1,0 +1,6 @@
+modules:
+  credentials:
+    -   module: 'bill-collection'
+        password: 'nafiz'
+    -   module: 'commission-service'
+        password: 'nafiz2'
