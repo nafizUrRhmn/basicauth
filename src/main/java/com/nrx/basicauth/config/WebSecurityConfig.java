@@ -3,11 +3,13 @@ package com.nrx.basicauth.config;
 import com.nrx.basicauth.dto.ModuleDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,15 +26,30 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private final AppProperties appProperties;
+    private static final String[] PERMIT_LIST = {
+        "/i18n/**",
+        "/assets/**",
+        "/webjars/**",
+        "/swagger-resources/**",
+        "/swagger-ui/**",
+        "/actuator/**",
+        "/api-docs/**"
+    };
 
     public WebSecurityConfig(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
     @Bean
-    public SecurityFilterChain filters(HttpSecurity http) throws Exception{
-       return http.authorizeHttpRequests(u -> u.requestMatchers("/public/**")
-                .permitAll().anyRequest().authenticated()).httpBasic(Customizer.withDefaults()).build();
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        return http.authorizeHttpRequests(
+            authorize -> authorize.requestMatchers(HttpMethod.GET, PERMIT_LIST).permitAll().anyRequest()
+                .authenticated())
+            .httpBasic(Customizer.withDefaults())
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable()).build();
     }
 
     @Bean
